@@ -4,21 +4,17 @@ from flask import Blueprint, jsonify, make_response, request, abort
 
 books_bp = Blueprint("books", __name__, url_prefix = "/books")
 
-def validate_book(book_id):
+def validate_model(cls, model_id):
     try:
-        book_id = int(book_id)
+        book_id = int(model_id)
     except:
-        abort(make_response({
-            "message": f"Book {book_id} invalid"
-        }, 400
-        ))
+        abort(make_response({"message":f"{cls.__name__} {model_id} invalid"}, 400))
 
-    book = Book.query.get(book_id)
+    book = Book.query.get(model_id)
+
     if not book:
-        abort(make_response({
-            "message": f"Book {book_id} not found"
-        }, 404
-        ))
+        abort(make_response({"message":f"{cls.__name__} {model_id} not found"}, 404))
+
     return book
 
 @books_bp.route("", methods=["POST"])
@@ -47,25 +43,25 @@ def read_all_books():
 
 @books_bp.route("/<book_id>", methods=["Get"])
 def read_one_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     return book.to_dict()
 
 @books_bp.route("/<book_id>", methods=["PUT"])
 def update_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
     request_body = request.get_json()
     
     book.title = request_body["title"]
     book.description = request_body["description"]
 
     db.session.commit()
-    return make_response(jsonify(f"Book {book.id} successfully updated."))
+    return make_response(jsonify(f"Book #{book.id} successfully updated"))
 
 @books_bp.route("/<book_id>", methods=["DELETE"])
 def delete_book(book_id):
-    book = validate_book(book_id)
+    book = validate_model(Book, book_id)
 
     db.session.delete(book)
     db.session.commit()
     
-    return make_response(jsonify(f"Book {book.id} successfully deleted"))
+    return make_response(jsonify(f"Book #{book.id} successfully deleted"))

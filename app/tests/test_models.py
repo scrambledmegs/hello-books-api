@@ -1,4 +1,6 @@
 from app.models.book import Book
+import pytest
+
 
 def test_to_dict_no_missing_data():
     # Arrange
@@ -57,9 +59,7 @@ def test_to_dict_missing_description():
     assert result["title"] == "Ocean Book"
     assert result["description"] is None
 
-    from app.models.book import Book
-import pytest
-...
+
 
 def test_from_dict_returns_book():
     # Arrange
